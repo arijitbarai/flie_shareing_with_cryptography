@@ -1,0 +1,60 @@
+name: Python Flask Deployment
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on pushes to the 'main' branch
+  pull_request:
+    branches:
+      - main  # Trigger the workflow on pull requests to the 'main' branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu version as the runner
+
+    steps:
+    # Step 1: Check out the repository code
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    # Step 2: Set up Python environment
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'  # Define the Python version to use (change if needed)
+
+    # Step 3: Install dependencies
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip  # Upgrade pip to the latest version
+        pip install -r requirements.txt  # Install dependencies listed in requirements.txt
+
+    # Step 4: Run any tests (if applicable)
+    # Uncomment the following lines if you have tests to run
+    # - name: Run Tests
+    #   run: |
+    #     pytest  # Use your testing framework, e.g., pytest
+
+    # Step 5: Run the Flask Application
+    - name: Run Flask Application
+      run: |
+        # Start the Flask app in the background (this is just an example)
+        nohup python app.py &  # Start the Flask app in the background
+        # Wait for the Flask server to start
+        sleep 10  # Adjust time depending on how long it takes for your app to be ready
+        # You can add further actions here, like hitting the app's endpoint for testing
+
+    # Step 6: Optional: Save build artifacts or run tests
+    - name: Save Build Artifacts
+      if: success()  # Only if the script runs successfully
+      run: |
+        mkdir -p results
+        touch results/success.txt  # Example of creating a file to indicate success
+        echo "Deployment successful" > results/success.txt
+
+    # Step 7: Upload build artifacts (optional)
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: deployment-results
+        path: results  # Path to the results directory (optional)
